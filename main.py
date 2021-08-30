@@ -1,16 +1,18 @@
 #! Just starting out the program to be executable
 from PIL import Image, ImageOps, ImageDraw, ImageFont
+import photoFunctions as functions
+import fileNamePattern
 import wx
 import os.path
 import shutil
 import time
 import math
 
+
+
+## Building the GUI ##
+
 window = wx.App(False);
-directory = ""
-chosen = False
-global fileNameHolder, currentImage, amount, container, x, y
-amount = 0
 currentImage = wx.EmptyImage(1,1)
 container = wx.Frame(None, wx.ID_ANY, "Picture Editing")
 container.Maximize()
@@ -22,41 +24,56 @@ bothSidesContainer.Add(right, 3, wx.ALIGN_RIGHT | wx.EXPAND)
 leftOrganiser = wx.BoxSizer(wx.VERTICAL)
 rightOrganiser = wx.BoxSizer(wx.HORIZONTAL)
 sizeToFill = container.GetSize()
-x = sizeToFill[0]
-y = sizeToFill[1]
+xSize = sizeToFill[0]
+ySize = sizeToFill[1]
 
 ## Directory selection button
 chooseDirectory = wx.Button(left, wx.ID_ANY, label="Choose Directory:")
 # The chosen directory displayed as StaticText to the right of the button
 selection = wx.StaticText(left)
-# Sizer to keep these two aligned properly lol
+# Sizer to keep these two aligned properly
 anotherSizer = wx.BoxSizer(wx.HORIZONTAL)
 anotherSizer.Add(chooseDirectory, 1, wx.SHAPED)
 anotherSizer.Add(selection, 2, wx.SHAPED)
 
+# A textbox area for the ability to type in a new name for the file
 rename = wx.StaticText(left, wx.ID_ANY, "Rename file here:  ")
-
 fileNameHolder = wx.TextCtrl(left, wx.ID_ANY, "File name")
 midSection = wx.BoxSizer(wx.HORIZONTAL)
 midSection.Add(rename, 1, wx.EXPAND)
 midSection.Add(fileNameHolder, 2, wx.EXPAND)
 
+# A section for resizing the image properly
 resizing = wx.Button(left, wx.ID_ANY, label="Resize image to window")
 resizer = wx.BoxSizer(wx.HORIZONTAL)
 resizer.Add(resizing, 1, wx.EXPAND)
 
+# A grid of 4 horizontal buttons to choose what each button does
 row = wx.GridSizer(rows=1, cols=4, hgap=4, vgap=4)
 for button in ["90", "180", "Offset <", "Offset >"]:
 	thing = wx.Button(left, wx.ID_ANY, label=button)
-	def rotate(event, GIMMEDANAME=button):
-		rotation(GIMMEDANAME)
-	thing.Bind(wx.EVT_BUTTON, rotate)
+	def rotate(event, name=button):
+		functions.rotation(name)
+	thing.Bind(wx.EVT_BUTTON, functions.rotate)
 	row.Add(thing, 1, wx.SHAPED)
 
-## This is where to add the caption thing and add it to left sizer
+## This is where to add the caption area
+
+
+# Contains the submit button
 submission = wx.Button(left, wx.ID_ANY, label="Submit")
 last = wx.BoxSizer(wx.HORIZONTAL)
 last.Add(submission, 4, wx.EXPAND)
+
+
+
+
+
+### TODO: finish reorganising the code from this part down
+directory = ""
+chosen = False
+global fileNameHolder, amount
+amount = 0
 
 def replaceWithImage(image):
 	global right, x, y
@@ -76,37 +93,6 @@ def replaceWithImage(image):
 	shower = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
 	rightOrganiser.Add(shower, 1, wx.ALIGN_CENTER | wx.EXPAND)
 
-def pattern(directory):
-	x = 0
-	y = len(os.listdir(directory))
-	print(y)
-	for img in os.listdir(directory):
-		x = x + 1
-		if (img.endswith(".jpg") or img.endswith(".JPG")):
-			if not os.path.exists(directory+"\\Edited Photos"):
-				os.mkdir(directory+"\\Edited Photos")
-				print("Made Edited Photos directory!")
-			if not os.path.exists(directory+"\\Original Photos"):
-				os.mkdir(directory+"\\Original Photos")
-				print("Made Original Photos directory!")
-			global amount, currentImage
-			amount = 0
-			currentImage = directory+"//"+img
-			## Reset text in fileNameHolder each time
-			fileNameHolder.SetLabel(os.path.splitext(img)[0]) ## New line
-			replaceWithImage(currentImage)
-			break
-		elif not (img.endswith(".JPG") or img.endswith(".jpg")) and y == x:
-			print("No more pictures in this directory")
-			exit()
-def saveImage(asname):
-	global editer, currentImage
-	editer.save(os.path.dirname(currentImage)+"//Edited Photos//"+asname+"TV.JPG")
-	shutil.move(currentImage, os.path.dirname(currentImage)+"//Original Photos//"+asname+".JPG")
-	if os.path.exists(currentImage):
-		print("No more picture files in directory")
-		exit()
-
 def dirClicked(event):
 	dia = wx.DirDialog(container, "Choose the parent directory", "C:/", 0, (10,10), wx.Size(400,300))
     	dun = dia.ShowModal()
@@ -119,43 +105,6 @@ def dirClicked(event):
     		directory = ""
     		return directory
 
-def rotation(direction):
-	global showImage, amount, editer, x, y, right
-	d = right.GetChildren()
-	editer.thumbnail((x,y))
-	if direction=="90":
-		editer = editer.transpose(Image.ROTATE_90)
-		showImage = wx.EmptyImage(editer.size[0],editer.size[1])
-		showImage.SetData(editer.convert('RGB').tostring())
-		for selectedFile in d:
-			NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
-			selectedFile.Destroy()
-		rightOrganiser.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
-	elif direction=="180":
-		amount = amount+.001
-		editer = editer.transpose(Image.ROTATE_180)
-		showImage = wx.EmptyImage(editer.size[0],editer.size[1])
-		showImage.SetData(editer.convert('RGB').tostring())
-		for selectedFile in d:
-			NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
-			selectedFile.Destroy()
-		rightOrganiser.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
-
-def getName():
-	global fileNameHolder
-	TOOMUCH = fileNameHolder.GetValue()
-	return TOOMUCH
-
-def resizeIt(stupidevent):
-	global editer, x, y, showImage
-	d = right.GetChildren()
-	editer.thumbnail((x, y))
-	showImage = wx.EmptyImage(editer.size[0],editer.size[1])
-	showImage.SetData(editer.convert('RGB').tostring())
-	for selectedFile in d:
-		selectedFile.Destroy()
-	NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
-	rightOrganiser.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
 
 ## Allow editing for font and color to be seen best. BLACK OR WHITE
 # Text Input
@@ -209,7 +158,7 @@ container.SetAutoLayout(1)
 bothSidesContainer.Fit(container)
 container.Show(True)
 
-dirClicked("a")
+dirClicked("Open")
 
 window.MainLoop()
 exit()
