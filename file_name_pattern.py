@@ -1,3 +1,5 @@
+import os
+
 def pattern(directory):
 	x = 0
 	y = len(os.listdir(directory))

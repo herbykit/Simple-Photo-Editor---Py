@@ -12,11 +12,15 @@ import math
 global file_name_holder
 # Defining some variables used in the UI within some functions
 global right, xSize, ySize
+# Defining the base directory as an empty string to avoid issues with null values
+directory = ""
+# Defines an image variable for use across functions different from currentImage
+global edited_image
 
 
 ##### Building the GUI #####
 window = wx.App(False);
-currentImage = wx.EmptyImage(1,1)
+currentImage = wx.Image(1,1)
 container = wx.Frame(None, wx.ID_ANY, "Picture Editing")
 container.Maximize()
 left = wx.Panel(container, wx.ID_ANY)
@@ -60,7 +64,33 @@ for button in ["90", "180", "Offset <", "Offset >"]:
 	thing.Bind(wx.EVT_BUTTON, rotate)
 	row.Add(thing, 1, wx.SHAPED)
 
-## This is where to add the caption area
+## Captions section
+caption_text_holder = wx.StaticText(left, wx.ID_ANY, "Input caption here:")
+caption_textbox = wx.TextCtrl(left, wx.ID_ANY, "")
+caption1 = wx.BoxSizer(wx.HORIZONTAL)
+caption2 = wx.BoxSizer(wx.HORIZONTAL)
+caption1.Add(caption_text_holder)
+caption1.Add(caption_textbox)
+
+# Applies text to the image when clicked; possibly TODO to move into function
+for iteration_for_name in ["Black","White"]:
+	selected_color = wx.Button(left,wx.ID_ANY,label=iteration_for_name)
+	caption2.Add(selected_color)
+	def addText(name=selected_color):
+		global editer
+		global showImage
+		if name == "White":
+			color=(255,255,255)
+		elif name == "Black":
+			color=(0,0,0)
+		edited_image = ImageDraw.Draw(editer)
+		edited_image.text((0,editer.size[1]),text=caption_textbox.GetValue(),font=ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf',18),fill=color)
+		new_image_value = wx.EmptyImage(editor.size[0],editer.size[1])
+		new_image_value.SetData(edited_image.convert('RGB').tostring())
+		for old_image_values in right.GetChildren():
+			old_image_values.Destroy()
+		rightOrganiser.Add(new_image_value, 1, wx.ALIGN_CENTER | wx.EXPAND)
+	selected_color.Bind(wx.EVT_BUTTON, addText)
 
 
 # Contains the submit button
@@ -68,15 +98,6 @@ submission = wx.Button(left, wx.ID_ANY, label="Submit")
 last = wx.BoxSizer(wx.HORIZONTAL)
 last.Add(submission, 4, wx.EXPAND)
 
-
-
-
-
-### TODO: finish reorganising the code from this part down
-directory = ""
-chosen = False
-global amount
-amount = 0
 
 # Leaving this image replacement method within the main file due to heavy reliance on UI components
 def replaceWithImage(image):
@@ -99,51 +120,24 @@ def replaceWithImage(image):
 # Leaving this directory method in the main file due to heavy reliance on UI components
 def dirClicked(event):
 	dialogue = wx.Dirdialoguelog(container, "Choose the parent directory", "C:/", 0, (10,10), wx.Size(400,300))
-    	complete_request = dialogue.ShowModal()
-    	if complete_request == wx.ID_OK:
-        	directory = dialogue.GetPath()
-        	selection.SetLabel(directory)
-        	file_name_pattern.pattern(directory)
-        	return directory
-    	elif complete_request != wx.ID_OK:
-    		directory = ""
-    		return directory
+	complete_request = dialogue.ShowModal()
+	if complete_request == wx.ID_OK:
+		directory = dialogue.GetPath()
+		selection.SetLabel(directory)
+		file_name_pattern.pattern(directory)
+		return directory
+	elif complete_request != wx.ID_OK:
+		directory = ""
+		return directory
 
-
-## Allow editing for font and color to be seen best. BLACK OR WHITE
-# Text Input
-capterr = wx.StaticText(left, wx.ID_ANY, "Input caption here:")
-capter = wx.TextCtrl(left, wx.ID_ANY, "")
-caption1 = wx.BoxSizer(wx.HORIZONTAL)
-caption2 = wx.BoxSizer(wx.HORIZONTAL)
-caption1.Add(capterr)
-caption1.Add(capter)
-global newedit
-# Text Shown consistently, when button is pressed
-for nummy in ["Black","White"]:
-	tinktink = wx.Button(left,wx.ID_ANY,label=nummy)
-	caption2.Add(tinktink)
-	def addText(name=tinktink):
-		global editer
-		global showImage
-		if name == "White":
-			color=(255,255,255)
-		elif name == "Black":
-			color=(0,0,0)
-		newedit = ImageDraw.Draw(editer)
-		newedit.text((0,editer.size[1]),text=capter.GetValue(),font=ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf',18),fill=color)
-		nexter = wx.EmptyImage(editor.size[0],editer.size[1])
-		nexter.SetData(newedit.convert('RGB').tostring())
-		for lalala in right.GetChildren():
-			lalala.Destroy()
-		rightOrganiser.Add(nexter, 1, wx.ALIGN_CENTER | wx.EXPAND)
-	tinktink.Bind(wx.EVT_BUTTON, addText)
-
+# Finish working with the image and save it to a file
 def submitting(takeit):
 	global currentImage
 	saveImage(getName(file_name_holder))
 	pattern(os.path.dirname(currentImage))
 
+
+### The closing code for finishing with creating the UI ###
 left.Bind(wx.EVT_BUTTON, submitting, submission)
 resizing.Bind(wx.EVT_BUTTON, resizeIt)
 left.Bind(wx.EVT_BUTTON, dirClicked, chooseDirectory)
@@ -154,6 +148,7 @@ leftOrganiser.Add(resizer)
 leftOrganiser.Add(caption1)
 leftOrganiser.Add(caption2)
 leftOrganiser.Add(last)
+
 ## Show the GUI
 right.SetSizer(rightOrganiser)
 left.SetSizer(leftOrganiser)
