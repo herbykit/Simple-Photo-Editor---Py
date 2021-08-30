@@ -27,7 +27,7 @@ left = wx.Panel(container, wx.ID_ANY)
 right = wx.Panel(container, wx.ID_ANY)
 bothSidesContainer = wx.BoxSizer(wx.HORIZONTAL)
 bothSidesContainer.Add(left, 1, wx.ALIGN_LEFT | wx.EXPAND)
-bothSidesContainer.Add(right, 3, wx.ALIGN_RIGHT | wx.EXPAND)
+bothSidesContainer.Add(right, 3, wx.EXPAND)
 leftOrganiser = wx.BoxSizer(wx.VERTICAL)
 rightOrganiser = wx.BoxSizer(wx.HORIZONTAL)
 sizeToFill = container.GetSize()
@@ -85,7 +85,7 @@ for iteration_for_name in ["Black","White"]:
 			color=(0,0,0)
 		edited_image = ImageDraw.Draw(editer)
 		edited_image.text((0,editer.size[1]),text=caption_textbox.GetValue(),font=ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf',18),fill=color)
-		new_image_value = wx.EmptyImage(editor.size[0],editer.size[1])
+		new_image_value = wx.Image(editor.size[0],editer.size[1])
 		new_image_value.SetData(edited_image.convert('RGB').tostring())
 		for old_image_values in right.GetChildren():
 			old_image_values.Destroy()
@@ -119,7 +119,7 @@ def replaceWithImage(image):
 
 # Leaving this directory method in the main file due to heavy reliance on UI components
 def dirClicked(event):
-	dialogue = wx.Dirdialoguelog(container, "Choose the parent directory", "C:/", 0, (10,10), wx.Size(400,300))
+	dialogue = wx.DirDialog(container, "Choose the parent directory", "C:/", 0, (10,10), wx.Size(400,300))
 	complete_request = dialogue.ShowModal()
 	if complete_request == wx.ID_OK:
 		directory = dialogue.GetPath()
@@ -139,7 +139,7 @@ def submitting(takeit):
 
 ### The closing code for finishing with creating the UI ###
 left.Bind(wx.EVT_BUTTON, submitting, submission)
-resizing.Bind(wx.EVT_BUTTON, resizeIt)
+resizing.Bind(wx.EVT_BUTTON, functions.resizeIt)
 left.Bind(wx.EVT_BUTTON, dirClicked, chooseDirectory)
 leftOrganiser.Add(anotherSizer)
 leftOrganiser.Add(midSection)
