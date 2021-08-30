@@ -1,6 +1,8 @@
 # Basic Photo Editor
 ## Python
-This is a program I made back in 2016 that has not been updated since - it 
-lets you open a picture, rotate it how you want, and rename it to something 
-more accurate. In the future some planned updates are being able to add text 
-to the image, and cleaning up the code because it's not easy to read currently.
+This program is designed to allow opening a picture, rotating it either by typical 
+90 degrees or by individual degrees, and rename it manually to a better name than 
+08302021135703.jpeg.
+
+In the future, some updates will include adding text to the image in a selected area,
+in addition to reorganising the code and documenting it.

@@ -1,4 +1,4 @@
-#! Just starting out the program to be executable according to documentation?
+#! Just starting out the program to be executable
 from PIL import Image, ImageOps, ImageDraw, ImageFont
 import wx
 import os.path
@@ -9,37 +9,37 @@ import math
 window = wx.App(False);
 directory = ""
 chosen = False
-global current, amount, cont, x, y
+global fileNameHolder, currentImage, amount, container, x, y
 amount = 0
-current = wx.EmptyImage(1,1)
-cont = wx.Frame(None, wx.ID_ANY, "Picture Editing")
-cont.Maximize()
-left = wx.Panel(cont, wx.ID_ANY)
-right = wx.Panel(cont, wx.ID_ANY)
-totes = wx.BoxSizer(wx.HORIZONTAL)
-totes.Add(left, 1, wx.ALIGN_LEFT | wx.EXPAND)
-totes.Add(right, 3, wx.ALIGN_RIGHT | wx.EXPAND)
-lefts = wx.BoxSizer(wx.VERTICAL)
-rights = wx.BoxSizer(wx.HORIZONTAL)
-sizeToFill = cont.GetSize()
+currentImage = wx.EmptyImage(1,1)
+container = wx.Frame(None, wx.ID_ANY, "Picture Editing")
+container.Maximize()
+left = wx.Panel(container, wx.ID_ANY)
+right = wx.Panel(container, wx.ID_ANY)
+bothSidesContainer = wx.BoxSizer(wx.HORIZONTAL)
+bothSidesContainer.Add(left, 1, wx.ALIGN_LEFT | wx.EXPAND)
+bothSidesContainer.Add(right, 3, wx.ALIGN_RIGHT | wx.EXPAND)
+leftOrganiser = wx.BoxSizer(wx.VERTICAL)
+rightOrganiser = wx.BoxSizer(wx.HORIZONTAL)
+sizeToFill = container.GetSize()
 x = sizeToFill[0]
 y = sizeToFill[1]
 
 ## Directory selection button
-dirchoose = wx.Button(left, wx.ID_ANY, label="Choose Directory:")
+chooseDirectory = wx.Button(left, wx.ID_ANY, label="Choose Directory:")
 # The chosen directory displayed as StaticText to the right of the button
-named = wx.StaticText(left)
+selection = wx.StaticText(left)
 # Sizer to keep these two aligned properly lol
-nother = wx.BoxSizer(wx.HORIZONTAL)
-nother.Add(dirchoose, 1, wx.SHAPED)
-nother.Add(named, 2, wx.SHAPED)
+anotherSizer = wx.BoxSizer(wx.HORIZONTAL)
+anotherSizer.Add(chooseDirectory, 1, wx.SHAPED)
+anotherSizer.Add(selection, 2, wx.SHAPED)
 
-wutdat = wx.StaticText(left, wx.ID_ANY, "Rename file here:  ")
-global namer
-namer = wx.TextCtrl(left, wx.ID_ANY, "File name")
-midlng = wx.BoxSizer(wx.HORIZONTAL)
-midlng.Add(wutdat, 1, wx.EXPAND)
-midlng.Add(namer, 2, wx.EXPAND)
+rename = wx.StaticText(left, wx.ID_ANY, "Rename file here:  ")
+
+fileNameHolder = wx.TextCtrl(left, wx.ID_ANY, "File name")
+midSection = wx.BoxSizer(wx.HORIZONTAL)
+midSection.Add(rename, 1, wx.EXPAND)
+midSection.Add(fileNameHolder, 2, wx.EXPAND)
 
 resizing = wx.Button(left, wx.ID_ANY, label="Resize image to window")
 resizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -54,7 +54,6 @@ for button in ["90", "180", "Offset <", "Offset >"]:
 	row.Add(thing, 1, wx.SHAPED)
 
 ## This is where to add the caption thing and add it to left sizer
-
 submission = wx.Button(left, wx.ID_ANY, label="Submit")
 last = wx.BoxSizer(wx.HORIZONTAL)
 last.Add(submission, 4, wx.EXPAND)
@@ -63,17 +62,19 @@ def replaceWithImage(image):
 	global right, x, y
 	## Get the previous image
 	if right.GetChildren():
-		for stupidity in right.GetChildren():
+		for selectedFile in right.GetChildren():
 			## Remove the previous image
-			stupidity.Destroy()
+			selectedFile.Destroy()
+
 	## Add the next image
 	global editer
 	editer = Image.open(image)
 	editer.thumbnail((x,y))
-	global smth
-	smth = wx.Image(image)
-	shower = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(smth))
-	rights.Add(shower, 1, wx.ALIGN_CENTER | wx.EXPAND)
+
+	global showImage
+	showImage = wx.Image(image)
+	shower = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
+	rightOrganiser.Add(shower, 1, wx.ALIGN_CENTER | wx.EXPAND)
 
 def pattern(directory):
 	x = 0
@@ -88,30 +89,30 @@ def pattern(directory):
 			if not os.path.exists(directory+"\\Original Photos"):
 				os.mkdir(directory+"\\Original Photos")
 				print("Made Original Photos directory!")
-			global amount, current
+			global amount, currentImage
 			amount = 0
-			current = directory+"//"+img
-			## Reset text in namer each time
-			namer.SetLabel(os.path.splitext(img)[0]) ## New line
-			replaceWithImage(current)
+			currentImage = directory+"//"+img
+			## Reset text in fileNameHolder each time
+			fileNameHolder.SetLabel(os.path.splitext(img)[0]) ## New line
+			replaceWithImage(currentImage)
 			break
 		elif not (img.endswith(".JPG") or img.endswith(".jpg")) and y == x:
 			print("No more pictures in this directory")
 			exit()
 def saveImage(asname):
-	global editer, current
-	editer.save(os.path.dirname(current)+"//Edited Photos//"+asname+"TV.JPG")
-	shutil.move(current, os.path.dirname(current)+"//Original Photos//"+asname+".JPG")
-	if os.path.exists(current):
+	global editer, currentImage
+	editer.save(os.path.dirname(currentImage)+"//Edited Photos//"+asname+"TV.JPG")
+	shutil.move(currentImage, os.path.dirname(currentImage)+"//Original Photos//"+asname+".JPG")
+	if os.path.exists(currentImage):
 		print("No more picture files in directory")
 		exit()
 
 def dirClicked(event):
-	dia = wx.DirDialog(cont, "Choose the parent directory", "C:/", 0, (10,10), wx.Size(400,300))
+	dia = wx.DirDialog(container, "Choose the parent directory", "C:/", 0, (10,10), wx.Size(400,300))
     	dun = dia.ShowModal()
     	if dun == wx.ID_OK:
         	directory = dia.GetPath()
-        	named.SetLabel(directory)
+        	selection.SetLabel(directory)
         	pattern(directory)
         	return directory
     	elif dun != wx.ID_OK:
@@ -119,42 +120,42 @@ def dirClicked(event):
     		return directory
 
 def rotation(direction):
-	global smth, amount, editer, x, y, right
+	global showImage, amount, editer, x, y, right
 	d = right.GetChildren()
 	editer.thumbnail((x,y))
 	if direction=="90":
 		editer = editer.transpose(Image.ROTATE_90)
-		smth = wx.EmptyImage(editer.size[0],editer.size[1])
-		smth.SetData(editer.convert('RGB').tostring())
-		for stupidity in d:
-			NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(smth))
-			stupidity.Destroy()
-		rights.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
+		showImage = wx.EmptyImage(editer.size[0],editer.size[1])
+		showImage.SetData(editer.convert('RGB').tostring())
+		for selectedFile in d:
+			NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
+			selectedFile.Destroy()
+		rightOrganiser.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
 	elif direction=="180":
 		amount = amount+.001
 		editer = editer.transpose(Image.ROTATE_180)
-		smth = wx.EmptyImage(editer.size[0],editer.size[1])
-		smth.SetData(editer.convert('RGB').tostring())
-		for stupidity in d:
-			NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(smth))
-			stupidity.Destroy()
-		rights.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
+		showImage = wx.EmptyImage(editer.size[0],editer.size[1])
+		showImage.SetData(editer.convert('RGB').tostring())
+		for selectedFile in d:
+			NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
+			selectedFile.Destroy()
+		rightOrganiser.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
 
 def getName():
-	global namer
-	TOOMUCH = namer.GetValue()
+	global fileNameHolder
+	TOOMUCH = fileNameHolder.GetValue()
 	return TOOMUCH
 
 def resizeIt(stupidevent):
-	global editer, x, y, smth
+	global editer, x, y, showImage
 	d = right.GetChildren()
 	editer.thumbnail((x, y))
-	smth = wx.EmptyImage(editer.size[0],editer.size[1])
-	smth.SetData(editer.convert('RGB').tostring())
-	for stupidity in d:
-		stupidity.Destroy()
-	NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(smth))
-	rights.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
+	showImage = wx.EmptyImage(editer.size[0],editer.size[1])
+	showImage.SetData(editer.convert('RGB').tostring())
+	for selectedFile in d:
+		selectedFile.Destroy()
+	NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
+	rightOrganiser.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
 
 ## Allow editing for font and color to be seen best. BLACK OR WHITE
 # Text Input
@@ -171,7 +172,7 @@ for nummy in ["Black","White"]:
 	caption2.Add(tinktink)
 	def addText(name=tinktink):
 		global editer
-		global smth
+		global showImage
 		if name == "White":
 			color=(255,255,255)
 		elif name == "Black":
@@ -182,31 +183,31 @@ for nummy in ["Black","White"]:
 		nexter.SetData(newedit.convert('RGB').tostring())
 		for lalala in right.GetChildren():
 			lalala.Destroy()
-		rights.Add(nexter, 1, wx.ALIGN_CENTER | wx.EXPAND)
+		rightOrganiser.Add(nexter, 1, wx.ALIGN_CENTER | wx.EXPAND)
 	tinktink.Bind(wx.EVT_BUTTON, addText)
 
 def submitting(takeit):
-	global current
+	global currentImage
 	saveImage(getName())
-	pattern(os.path.dirname(current))
+	pattern(os.path.dirname(currentImage))
 
 left.Bind(wx.EVT_BUTTON, submitting, submission)
 resizing.Bind(wx.EVT_BUTTON, resizeIt)
-left.Bind(wx.EVT_BUTTON, dirClicked, dirchoose)
-lefts.Add(nother)
-lefts.Add(midlng)
-lefts.Add(row)
-lefts.Add(resizer)
-lefts.Add(caption1)
-lefts.Add(caption2)
-lefts.Add(last)
+left.Bind(wx.EVT_BUTTON, dirClicked, chooseDirectory)
+leftOrganiser.Add(anotherSizer)
+leftOrganiser.Add(midSection)
+leftOrganiser.Add(row)
+leftOrganiser.Add(resizer)
+leftOrganiser.Add(caption1)
+leftOrganiser.Add(caption2)
+leftOrganiser.Add(last)
 ## Show the GUI
-right.SetSizer(rights)
-left.SetSizer(lefts)
-cont.SetSizer(totes)
-cont.SetAutoLayout(1)
-totes.Fit(cont)
-cont.Show(True)
+right.SetSizer(rightOrganiser)
+left.SetSizer(leftOrganiser)
+container.SetSizer(bothSidesContainer)
+container.SetAutoLayout(1)
+bothSidesContainer.Fit(container)
+container.Show(True)
 
 dirClicked("a")
 
