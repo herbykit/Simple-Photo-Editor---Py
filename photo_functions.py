@@ -1,3 +1,8 @@
+from PIL import Image, ImageOps, ImageDraw, ImageFont
+import shutil
+import os.path
+
+
 def saveImage(asname):
 	global editer, currentImage
 	editer.save(os.path.dirname(currentImage)+"//Edited Photos//"+asname+"TV.JPG")
@@ -28,7 +33,7 @@ def rotation(direction):
 			selectedFile.Destroy()
 		rightOrganiser.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
 
-def resizeIt(stupidevent):
+def resizeIt(event):
 	global editer, x, y, showImage
 	d = right.GetChildren()
 	editer.thumbnail((x, y))
@@ -39,8 +44,6 @@ def resizeIt(stupidevent):
 	NEXT = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
 	rightOrganiser.Add(NEXT, 1, wx.ALIGN_CENTER | wx.EXPAND)
 
-def getName():
-	global fileNameHolder
-	TOOMUCH = fileNameHolder.GetValue()
-	return TOOMUCH
-
+def getName(file_name_holder):
+	actual_name = file_name_holder.GetValue()
+	return actual_name

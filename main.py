@@ -1,17 +1,20 @@
 #! Just starting out the program to be executable
 from PIL import Image, ImageOps, ImageDraw, ImageFont
-import photoFunctions as functions
-import fileNamePattern
+import photo_functions as functions
+import file_name_pattern
 import wx
 import os.path
 import shutil
 import time
 import math
 
+# Defining variables referenced in functions that are stored outside the function
+global file_name_holder
+# Defining some variables used in the UI within some functions
+global right, xSize, ySize
 
 
-## Building the GUI ##
-
+##### Building the GUI #####
 window = wx.App(False);
 currentImage = wx.EmptyImage(1,1)
 container = wx.Frame(None, wx.ID_ANY, "Picture Editing")
@@ -54,7 +57,7 @@ for button in ["90", "180", "Offset <", "Offset >"]:
 	thing = wx.Button(left, wx.ID_ANY, label=button)
 	def rotate(event, name=button):
 		functions.rotation(name)
-	thing.Bind(wx.EVT_BUTTON, functions.rotate)
+	thing.Bind(wx.EVT_BUTTON, rotate)
 	row.Add(thing, 1, wx.SHAPED)
 
 ## This is where to add the caption area
@@ -72,11 +75,11 @@ last.Add(submission, 4, wx.EXPAND)
 ### TODO: finish reorganising the code from this part down
 directory = ""
 chosen = False
-global fileNameHolder, amount
+global amount
 amount = 0
 
+# Leaving this image replacement method within the main file due to heavy reliance on UI components
 def replaceWithImage(image):
-	global right, x, y
 	## Get the previous image
 	if right.GetChildren():
 		for selectedFile in right.GetChildren():
@@ -93,15 +96,16 @@ def replaceWithImage(image):
 	shower = wx.StaticBitmap(right, wx.ID_ANY, wx.BitmapFromImage(showImage))
 	rightOrganiser.Add(shower, 1, wx.ALIGN_CENTER | wx.EXPAND)
 
+# Leaving this directory method in the main file due to heavy reliance on UI components
 def dirClicked(event):
-	dia = wx.DirDialog(container, "Choose the parent directory", "C:/", 0, (10,10), wx.Size(400,300))
-    	dun = dia.ShowModal()
-    	if dun == wx.ID_OK:
-        	directory = dia.GetPath()
+	dialogue = wx.Dirdialoguelog(container, "Choose the parent directory", "C:/", 0, (10,10), wx.Size(400,300))
+    	complete_request = dialogue.ShowModal()
+    	if complete_request == wx.ID_OK:
+        	directory = dialogue.GetPath()
         	selection.SetLabel(directory)
-        	pattern(directory)
+        	file_name_pattern.pattern(directory)
         	return directory
-    	elif dun != wx.ID_OK:
+    	elif complete_request != wx.ID_OK:
     		directory = ""
     		return directory
 
@@ -137,7 +141,7 @@ for nummy in ["Black","White"]:
 
 def submitting(takeit):
 	global currentImage
-	saveImage(getName())
+	saveImage(getName(file_name_holder))
 	pattern(os.path.dirname(currentImage))
 
 left.Bind(wx.EVT_BUTTON, submitting, submission)
