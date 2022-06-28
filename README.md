@@ -6,3 +6,7 @@ This program is designed to allow opening a picture, rotating it either by typic
 
 In the future, some updates will include adding text to the image in a selected area,
 in addition to reorganising the code and documenting it.
+
+# Historical information on this project
+
+This project was built and tested on Python 2.7, rather than 3.0. Updates will likely be necessary for future versions.
