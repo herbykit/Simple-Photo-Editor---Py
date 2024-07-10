@@ -4,8 +4,7 @@ This program is designed to allow opening a picture, rotating it either by typic
 90 degrees or by individual degrees, and rename it manually to a better name than 
 08302021135703.jpeg.
 
-In the future, some updates will include adding text to the image in a selected area,
-in addition to reorganising the code and documenting it.
+This project was originally used to help a family member edit and rename hundreds of photos on their Windows 7 computer that would freeze every time they opened the photo editor they normally used to edit the photos.
 
 # Historical information on this project
 
